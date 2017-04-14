@@ -114,6 +114,19 @@ assert() {
     _assert_fail "expected $expected${_indent}got $result" "$1" "$3"
 }
 
+assert_matches() {
+	# assert_matches <command> <output expression> [stdin]
+	(( tests_ran++)) || :
+	[[ -z "$DISCOVERONLY" ]] || return
+	expected_expr=$(echo -ne "${2:-}")
+	result="$(eval 2>/dev/null $1 <<< ${3:-})" || true
+	if echo "$result" | grep -E -q "$expected_expr"; then
+		[[ -z "$DEBUG" ]] || echo -n .
+		return
+	fi
+	_assert_fail "expected $expected_expr got $result" "$1" "$3"
+}
+
 assert_raises() {
     # assert_raises <command> <expected code> [stdin]
     (( tests_ran++ )) || :
