@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export DISCOVERONLY=${DISCOVERONLY:-}
-export DEBUG=${DEBUG:-}
+export VERBOSE=${VERBOSE:-}
 export STOP=${STOP:-}
 export INVARIANT=${INVARIANT:-}
 export CONTINUE=${CONTINUE:-}
@@ -49,7 +49,7 @@ Options:
 EOF
             exit 0;;
         -v|--verbose)
-            DEBUG=1;;
+            VERBOSE=1;;
         -x|--stop)
             STOP=1;;
         -i|--invariant)
@@ -79,7 +79,7 @@ assert_end() {
                             - ${tests_starttime/%N/000000000} ))")"  # in ns
     tests="$tests_ran ${*:+$* }tests"
     [[ -n "$DISCOVERONLY" ]] && echo "collected $tests." && _assert_reset && return
-    [[ -n "$DEBUG" ]] && echo
+    [[ -n "$VERBOSE" ]] && echo
     # to get report_time split tests_time on 2 substrings:
     #   ${tests_time:0:${#tests_time}-9} - seconds
     #   ${tests_time:${#tests_time}-9:3} - milliseconds
@@ -105,7 +105,7 @@ assert() {
     expected=$(echo -ne "${2:-}")
     result="$(eval 2>/dev/null $1 <<< ${3:-})" || true
     if [[ "$result" == "$expected" ]]; then
-        [[ -z "$DEBUG" ]] || echo -n .
+        [[ -z "$VERBOSE" ]] || echo -n .
         return
     fi
     result="$(sed -e :a -e '$!N;s/\n/\\n/;ta' <<< "$result")"
@@ -121,7 +121,7 @@ assert_matches() {
 	expected_expr=$(echo -ne "${2:-}")
 	result="$(eval 2>/dev/null $1 <<< ${3:-})" || true
 	if echo "$result" | grep -E -q "$expected_expr"; then
-		[[ -z "$DEBUG" ]] || echo -n .
+		[[ -z "$VERBOSE" ]] || echo -n .
 		return
 	fi
 	_assert_fail "expected $expected_expr got $result" "$1" "$3"
@@ -135,7 +135,7 @@ assert_raises() {
     (eval $1 <<< ${3:-}) > /dev/null 2>&1 || status=$?
     expected=${2:-0}
     if [[ "$status" -eq "$expected" ]]; then
-        [[ -z "$DEBUG" ]] || echo -n .
+        [[ -z "$VERBOSE" ]] || echo -n .
         return
     fi
     _assert_fail "program terminated with code $status instead of $expected" "$1" "$3"
@@ -143,10 +143,10 @@ assert_raises() {
 
 _assert_fail() {
     # _assert_fail <failure> <command> <stdin>
-    [[ -n "$DEBUG" ]] && echo -n X
+    [[ -n "$VERBOSE" ]] && echo -n X
     report="test #$tests_ran \"$2${3:+ <<< $3}\" failed:${_indent}$1"
     if [[ -n "$STOP" ]]; then
-        [[ -n "$DEBUG" ]] && echo
+        [[ -n "$VERBOSE" ]] && echo
         echo "$report"
         exit 1
     fi
@@ -178,7 +178,7 @@ _skip() {
         # yet because *after* the command we need to reset extdebug/errexit (in
         # another DEBUG trap.)
         tests_trapped=1
-        [[ -z "$DEBUG" ]] || echo -n s
+        [[ -z "$VERBOSE" ]] || echo -n s
         return 1
     else
         trap - DEBUG

@@ -18,7 +18,7 @@ assert_end demo
 
 _clean() {
     _assert_reset # reset state
-    DEBUG= STOP= INVARIANT=1 DISCOVERONLY= CONTINUE= # reset flags
+    VERBOSE= STOP= INVARIANT=1 DISCOVERONLY= CONTINUE= # reset flags
     eval $* # read new flags
 }
 
@@ -33,9 +33,9 @@ assert "_clean; assert true '1'; assert_end" \
 assert "_clean; assert 'true' 'foo' 'bar'; assert_end" \
 'test #1 "true <<< bar" failed:\n\texpected "foo"\n\tgot nothing\n1 of 1 tests failed.'
 # debug output (-v)
-assert "_clean DEBUG=1; assert true; assert_end" \
+assert "_clean VERBOSE=1; assert true; assert_end" \
 ".\nall 1 tests passed."
-assert "_clean DEBUG=1; assert_raises false; assert_end" \
+assert "_clean VERBOSE=1; assert_raises false; assert_end" \
 'X\ntest #1 "false" failed:\n\tprogram terminated with code 1 instead of 0
 1 of 1 tests failed.'
 # collect tests only (-d)
@@ -117,7 +117,7 @@ test #2 "false" failed:
 # commit: added default value for assert_raises
 assert_raises "_clean; assert_raises true; assert_end" 0
 # commit: fixed verbose failure reports in assert_raises
-assert "_clean DEBUG=1; assert_raises false; assert_end" 'X
+assert "_clean VERBOSE=1; assert_raises false; assert_end" 'X
 test #1 "false" failed:
 \tprogram terminated with code 1 instead of 0
 1 of 1 tests failed.'
@@ -158,7 +158,7 @@ assert "echo -n %s | wc -c" "2"
 date() {         # date mock
     echo "123N"
 }
-assert '_clean DEBUG=1 INVARIANT=; tests_starttime="0N"; assert_end' \
+assert '_clean VERBOSE=1 INVARIANT=; tests_starttime="0N"; assert_end' \
        '\nall 0 tests passed in 123.000s.'
 unset -f date  # bring back original date
 assert_end regression
